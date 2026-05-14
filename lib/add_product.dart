@@ -19,7 +19,6 @@ class _AddProductPageState extends State<AddProductPage> {
   bool _isLoading = false;
 
   Future<void> _saveProduct() async {
-    // Validasi input kosong
     if (_nameController.text.isEmpty || _priceController.text.isEmpty || _descController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Semua kolom harus diisi!'), backgroundColor: Colors.red),
@@ -33,15 +32,15 @@ class _AddProductPageState extends State<AddProductPage> {
       String? token = await _storage.read(key: 'token');
       
       final response = await http.post(
-        Uri.parse('https://task.itprojects.web.id/api/products'), // Endpoint simpan draft
+        Uri.parse('https://task.itprojects.web.id/api/products'), 
         headers: {
-          'Authorization': 'Bearer $token', // Wajib bawa token
+          'Authorization': 'Bearer $token', 
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
         body: jsonEncode({
           'name': _nameController.text,
-          'price': int.tryParse(_priceController.text) ?? 0, // Pastikan price dikirim sebagai integer
+          'price': int.tryParse(_priceController.text) ?? 0, 
           'description': _descController.text,
         }),
       );
@@ -51,7 +50,6 @@ class _AddProductPageState extends State<AddProductPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Draft produk berhasil disimpan!'), backgroundColor: Colors.green),
           );
-          // Kembali ke halaman sebelumnya dan kirim sinyal 'true' bahwa data berhasil ditambah
           Navigator.pop(context, true); 
         }
       } else {
@@ -94,7 +92,7 @@ class _AddProductPageState extends State<AddProductPage> {
             const SizedBox(height: 16),
             TextField(
               controller: _priceController,
-              keyboardType: TextInputType.number, // Memunculkan keyboard angka
+              keyboardType: TextInputType.number, 
               decoration: const InputDecoration(
                 labelText: 'Harga (Rp)',
                 border: OutlineInputBorder(),
@@ -103,7 +101,7 @@ class _AddProductPageState extends State<AddProductPage> {
             const SizedBox(height: 16),
             TextField(
               controller: _descController,
-              maxLines: 3, // Agar kolom deskripsi lebih lebar
+              maxLines: 3, 
               decoration: const InputDecoration(
                 labelText: 'Deskripsi Produk',
                 border: OutlineInputBorder(),

@@ -21,20 +21,16 @@ class _ProductPageState extends State<ProductPage> {
   @override
   void initState() {
     super.initState();
-    // Panggil data produk segera setelah halaman dibuka
     _fetchProducts();
   }
 
-  // Fungsi untuk mengambil data produk dari server
   Future<void> _fetchProducts() async {
     setState(() => _isLoading = true);
     
     try {
-      // 1. Ambil token dari storage
       String? token = await _storage.read(key: 'token');
       if (token == null) throw Exception('Token tidak ditemukan');
 
-      // 2. Request GET ke endpoint produk dengan membawa Bearer Token
       final response = await http.get(
         Uri.parse('https://task.itprojects.web.id/api/products'),
         headers: {
@@ -43,30 +39,23 @@ class _ProductPageState extends State<ProductPage> {
         },
       );
 
-      // 3. Jika berhasil (status 200), ubah JSON menjadi List of Product
       if (response.statusCode == 200) {
         final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
         
-        // Print ke terminal agar kita bisa mengintip bentuk asli dari server
         print('=== DATA ASLI DARI SERVER ===');
         print(decodedResponse);
 
         List<dynamic> rawList = [];
 
-        // Deteksi otomatis di mana server meletakkan daftar produknya
         if (decodedResponse['data'] is List) {
-          // Kasus 1: Datanya berbentuk "data": [ ... ]
           rawList = decodedResponse['data'];
         } else if (decodedResponse['data'] != null && decodedResponse['data']['products'] != null) {
-          // Kasus 2: Datanya berbentuk "data": { "products": [ ... ] }
           rawList = decodedResponse['data']['products'];
         } else if (decodedResponse['products'] != null) {
-          // Kasus 3: Datanya berbentuk "products": [ ... ]
           rawList = decodedResponse['products'];
         }
 
         setState(() {
-          // Mapping data ke dalam Class Model
           _products = rawList.map((json) => Product.fromJson(json)).toList();
         });
       } else {
@@ -87,27 +76,25 @@ class _ProductPageState extends State<ProductPage> {
     }
   }
 
-  // Fungsi untuk menghapus produk (Soft Delete ke Server)
   Future<void> _deleteProduct(int id) async {
     try {
       String? token = await _storage.read(key: 'token');
       if (token == null) throw Exception('Token tidak ditemukan');
 
       final response = await http.delete(
-        Uri.parse('https://task.itprojects.web.id/api/products/$id'), // Endpoint delete by ID
+        Uri.parse('https://task.itprojects.web.id/api/products/$id'), 
         headers: {
           'Authorization': 'Bearer $token',
           'Accept': 'application/json',
         },
       );
 
-      // Status 200 (OK) atau 204 (No Content) biasanya menandakan sukses dihapus
       if (response.statusCode == 200 || response.statusCode == 204) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Produk berhasil dihapus'), backgroundColor: Colors.green),
           );
-          _fetchProducts(); // Refresh list produk setelah berhasil dihapus
+          _fetchProducts(); 
         }
       } else {
         if (mounted) {
@@ -134,12 +121,10 @@ class _ProductPageState extends State<ProductPage> {
         backgroundColor: Colors.blueAccent,
         foregroundColor: Colors.white,
         actions: [
-          // Tombol untuk Submit Tugas (Nanti kita fungsikan)
           IconButton(
           icon: const Icon(Icons.cloud_upload),
           tooltip: 'Submit Tugas',
           onPressed: () {
-            // PERINTAH PINDAH HALAMAN
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const SubmitPage()),
@@ -149,7 +134,7 @@ class _ProductPageState extends State<ProductPage> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator()) // Animasi loading
+          ? const Center(child: CircularProgressIndicator()) 
           : _products.isEmpty
               ? const Center(child: Text('Belum ada draft produk. Silakan tambah!'))
               : ListView.builder(
@@ -181,12 +166,10 @@ class _ProductPageState extends State<ProductPage> {
                             Text(product.description),
                           ],
                         ),
-                        // ---- BAGIAN BARU YANG DITAMBAHKAN ----
                         trailing: IconButton(
                           icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
                           tooltip: 'Hapus Produk',
                           onPressed: () {
-                            // Munculkan Pop-up Konfirmasi sebelum menghapus
                             showDialog(
                               context: context,
                               builder: (context) => AlertDialog(
@@ -194,13 +177,13 @@ class _ProductPageState extends State<ProductPage> {
                                 content: Text('Yakin ingin menghapus produk "${product.name}"?'),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.pop(context), // Tutup pop-up
+                                    onPressed: () => Navigator.pop(context), 
                                     child: const Text('Batal'),
                                   ),
                                   TextButton(
                                     onPressed: () {
-                                      Navigator.pop(context); // Tutup pop-up
-                                      _deleteProduct(product.id); // Jalankan fungsi delete
+                                      Navigator.pop(context); 
+                                      _deleteProduct(product.id); 
                                     },
                                     child: const Text('Hapus', style: TextStyle(color: Colors.red)),
                                   ),
@@ -213,7 +196,6 @@ class _ProductPageState extends State<ProductPage> {
                       );
                   },
                 ),
-      // Tombol Tambah Produk
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.blueAccent,
         child: const Icon(Icons.add, color: Colors.white),
@@ -223,7 +205,7 @@ class _ProductPageState extends State<ProductPage> {
                 MaterialPageRoute(builder: (context) => const AddProductPage()),
               );
               if (result == true) {
-                _fetchProducts(); // Refresh data produk setelah kembali dari halaman tambah
+                _fetchProducts(); 
               }
         },
       ),

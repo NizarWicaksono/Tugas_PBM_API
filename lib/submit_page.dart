@@ -12,7 +12,7 @@ class SubmitPage extends StatefulWidget {
 
 class _SubmitPageState extends State<SubmitPage> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _priceController = TextEditingController(); // Tambahan controller harga
+  final TextEditingController _priceController = TextEditingController(); 
   final TextEditingController _descController = TextEditingController();
   final TextEditingController _githubController = TextEditingController();
   final _storage = const FlutterSecureStorage();
@@ -20,7 +20,6 @@ class _SubmitPageState extends State<SubmitPage> {
   bool _isLoading = false;
 
   Future<void> _submitTugas() async {
-    // Validasi agar semua kolom (termasuk harga) terisi
     if (_nameController.text.isEmpty || 
         _priceController.text.isEmpty || 
         _descController.text.isEmpty || 
@@ -88,11 +87,6 @@ class _SubmitPageState extends State<SubmitPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Text(
-              'Pastikan repository GitHub kamu bersifat PUBLIC!',
-              style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 24),
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(labelText: 'Nama Produk Final', border: OutlineInputBorder()),
@@ -115,7 +109,7 @@ class _SubmitPageState extends State<SubmitPage> {
               controller: _githubController,
               decoration: const InputDecoration(
                 labelText: 'Link GitHub Repository',
-                hintText: 'https://github.com/nizarwicaksono/repo-anda',
+                hintText: 'https://github.com/NizarWicaksono/...',
                 prefixIcon: Icon(Icons.link),
                 border: OutlineInputBorder(),
               ),

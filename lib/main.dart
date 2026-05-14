@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'login.dart'; // Import file yang baru dibuat
+import 'login.dart'; 
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Tugas PBM 2026',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const LoginPage(), // Tampilkan halaman login sebagai home
+      home: const LoginPage(), 
     );
   }
 }
