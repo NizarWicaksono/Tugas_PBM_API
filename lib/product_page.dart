@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'models/product_models.dart'; 
 import 'add_product.dart';
+import 'submit_page.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -135,12 +136,16 @@ class _ProductPageState extends State<ProductPage> {
         actions: [
           // Tombol untuk Submit Tugas (Nanti kita fungsikan)
           IconButton(
-            icon: const Icon(Icons.cloud_upload),
-            tooltip: 'Submit Tugas',
-            onPressed: () {
-              // TODO: Buat fitur submit tugas
-            },
-          ),
+          icon: const Icon(Icons.cloud_upload),
+          tooltip: 'Submit Tugas',
+          onPressed: () {
+            // PERINTAH PINDAH HALAMAN
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SubmitPage()),
+          );
+        },
+      ),
         ],
       ),
       body: _isLoading
