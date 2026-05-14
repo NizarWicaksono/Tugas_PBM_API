@@ -44,11 +44,29 @@ class _ProductPageState extends State<ProductPage> {
 
       // 3. Jika berhasil (status 200), ubah JSON menjadi List of Product
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final List<dynamic> productList = data['products']; 
+        final Map<String, dynamic> decodedResponse = jsonDecode(response.body);
         
+        // Print ke terminal agar kita bisa mengintip bentuk asli dari server
+        print('=== DATA ASLI DARI SERVER ===');
+        print(decodedResponse);
+
+        List<dynamic> rawList = [];
+
+        // Deteksi otomatis di mana server meletakkan daftar produknya
+        if (decodedResponse['data'] is List) {
+          // Kasus 1: Datanya berbentuk "data": [ ... ]
+          rawList = decodedResponse['data'];
+        } else if (decodedResponse['data'] != null && decodedResponse['data']['products'] != null) {
+          // Kasus 2: Datanya berbentuk "data": { "products": [ ... ] }
+          rawList = decodedResponse['data']['products'];
+        } else if (decodedResponse['products'] != null) {
+          // Kasus 3: Datanya berbentuk "products": [ ... ]
+          rawList = decodedResponse['products'];
+        }
+
         setState(() {
-          _products = productList.map((json) => Product.fromJson(json)).toList();
+          // Mapping data ke dalam Class Model
+          _products = rawList.map((json) => Product.fromJson(json)).toList();
         });
       } else {
         if (mounted) {
@@ -60,7 +78,7 @@ class _ProductPageState extends State<ProductPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Terjadi kesalahan jaringan')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     } finally {
