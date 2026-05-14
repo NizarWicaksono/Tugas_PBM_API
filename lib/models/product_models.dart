@@ -15,7 +15,7 @@ class Product {
     return Product(
       id: json['id'] ?? 0,
       name: json['name'] ?? 'Tanpa Nama',
-      price: json['price'] ?? 0,
+      price: json['price'] != null ? num.tryParse(json['price'].toString()) ?? 0 : 0,
       description: json['description'] ?? 'Tidak ada deskripsi',
     );
   }

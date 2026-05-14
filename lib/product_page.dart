@@ -86,6 +86,44 @@ class _ProductPageState extends State<ProductPage> {
     }
   }
 
+  // Fungsi untuk menghapus produk (Soft Delete ke Server)
+  Future<void> _deleteProduct(int id) async {
+    try {
+      String? token = await _storage.read(key: 'token');
+      if (token == null) throw Exception('Token tidak ditemukan');
+
+      final response = await http.delete(
+        Uri.parse('https://task.itprojects.web.id/api/products/$id'), // Endpoint delete by ID
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+
+      // Status 200 (OK) atau 204 (No Content) biasanya menandakan sukses dihapus
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Produk berhasil dihapus'), backgroundColor: Colors.green),
+          );
+          _fetchProducts(); // Refresh list produk setelah berhasil dihapus
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Gagal menghapus: ${response.statusCode}'), backgroundColor: Colors.red),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -124,10 +162,7 @@ class _ProductPageState extends State<ProductPage> {
                         contentPadding: const EdgeInsets.all(16),
                         title: Text(
                           product.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                         ),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,18 +170,42 @@ class _ProductPageState extends State<ProductPage> {
                             const SizedBox(height: 8),
                             Text(
                               'Rp ${product.price}',
-                              style: const TextStyle(
-                                color: Colors.green, 
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
+                              style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600, fontSize: 16),
                             ),
                             const SizedBox(height: 8),
                             Text(product.description),
                           ],
                         ),
+                        // ---- BAGIAN BARU YANG DITAMBAHKAN ----
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                          tooltip: 'Hapus Produk',
+                          onPressed: () {
+                            // Munculkan Pop-up Konfirmasi sebelum menghapus
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Hapus Draft?'),
+                                content: Text('Yakin ingin menghapus produk "${product.name}"?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context), // Tutup pop-up
+                                    child: const Text('Batal'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context); // Tutup pop-up
+                                      _deleteProduct(product.id); // Jalankan fungsi delete
+                                    },
+                                    child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    );
+                      );
                   },
                 ),
       // Tombol Tambah Produk
