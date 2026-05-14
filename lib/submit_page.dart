@@ -12,6 +12,7 @@ class SubmitPage extends StatefulWidget {
 
 class _SubmitPageState extends State<SubmitPage> {
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController(); // Tambahan controller harga
   final TextEditingController _descController = TextEditingController();
   final TextEditingController _githubController = TextEditingController();
   final _storage = const FlutterSecureStorage();
@@ -19,7 +20,11 @@ class _SubmitPageState extends State<SubmitPage> {
   bool _isLoading = false;
 
   Future<void> _submitTugas() async {
-    if (_nameController.text.isEmpty || _descController.text.isEmpty || _githubController.text.isEmpty) {
+    // Validasi agar semua kolom (termasuk harga) terisi
+    if (_nameController.text.isEmpty || 
+        _priceController.text.isEmpty || 
+        _descController.text.isEmpty || 
+        _githubController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Semua kolom wajib diisi!'), backgroundColor: Colors.red),
       );
@@ -32,7 +37,7 @@ class _SubmitPageState extends State<SubmitPage> {
       String? token = await _storage.read(key: 'token');
       
       final response = await http.post(
-        Uri.parse('https://task.itprojects.web.id/api/products/submit'), // Endpoint khusus Submit
+        Uri.parse('https://task.itprojects.web.id/api/products/submit'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -40,8 +45,9 @@ class _SubmitPageState extends State<SubmitPage> {
         },
         body: jsonEncode({
           'name': _nameController.text,
+          'price': int.tryParse(_priceController.text) ?? 0, // Mengirim harga sebagai angka
           'description': _descController.text,
-          'github_url': _githubController.text, // Link GitHub
+          'github_url': _githubController.text,
         }),
       );
 
@@ -50,7 +56,7 @@ class _SubmitPageState extends State<SubmitPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('🎉 Tugas Berhasil Disubmit!'), backgroundColor: Colors.green),
           );
-          Navigator.pop(context); // Kembali ke katalog setelah sukses
+          Navigator.pop(context);
         }
       } else {
         if (mounted) {
@@ -92,17 +98,24 @@ class _SubmitPageState extends State<SubmitPage> {
               decoration: const InputDecoration(labelText: 'Nama Produk Final', border: OutlineInputBorder()),
             ),
             const SizedBox(height: 16),
+            // Kolom input harga baru
+            TextField(
+              controller: _priceController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Harga Produk (Rp)', border: OutlineInputBorder()),
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: _descController,
               maxLines: 2,
-              decoration: const InputDecoration(labelText: 'Pesan / Deskripsi', border: OutlineInputBorder()),
+              decoration: const InputDecoration(labelText: 'Deskripsi Produk', border: OutlineInputBorder()),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _githubController,
               decoration: const InputDecoration(
                 labelText: 'Link GitHub Repository',
-                hintText: 'https://github.com/NizarWicaksono/...',
+                hintText: 'https://github.com/nizarwicaksono/repo-anda',
                 prefixIcon: Icon(Icons.link),
                 border: OutlineInputBorder(),
               ),
@@ -116,7 +129,7 @@ class _SubmitPageState extends State<SubmitPage> {
                 onPressed: _isLoading ? null : _submitTugas,
                 child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Kumpulkan Tugas', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    : const Text('Kumpulkan Tugas Sekarang', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
           ],
